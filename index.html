@@ -44,6 +44,10 @@ body{
 }
 .f:focus{outline:none;transform:translateY(-.6vmin) scale(1.05);box-shadow:0 0 0 .8vmin var(--ink),0 1.5vmin 0 var(--shadow)}
 .f:active{transform:translateY(.6vmin);box-shadow:0 .3vmin 0 var(--shadow)}
+/* El navegador de la tele mueve un cursor: lo que está bajo el cursor se ve igual que con foco */
+@media (hover:hover){
+  .f:hover{transform:translateY(-.6vmin) scale(1.05);box-shadow:0 0 0 .8vmin var(--ink),0 1.5vmin 0 var(--shadow)}
+}
 .f.good{background:var(--good);color:#fff}
 .f.bad{background:var(--bad);color:#fff}
 
@@ -95,15 +99,15 @@ h2{font-size:6vmin;margin:0;line-height:1}
 @keyframes shake{25%{transform:translateX(-2vmin)}75%{transform:translateX(2vmin)}}
 
 /* Hoja del día */
-.play{display:grid;grid-template-columns:auto auto;gap:9vmin;align-items:center;margin-top:6vmin}
-.pad{display:grid;grid-template-columns:repeat(3,13vmin);gap:2vmin}
-.pad .f{height:12vmin;font-size:6.4vmin;font-weight:800}
-.pad .ok-key{background:var(--good);color:#fff}
+.play{display:grid;grid-template-columns:auto auto;gap:6vmin;align-items:center;margin-top:6vmin}
+.pad{display:grid;grid-template-columns:repeat(3,14vmin);gap:1.2vmin}
+.pad .f{height:13vmin;font-size:7vmin;font-weight:800}
+.pad .zero{grid-column:span 2}
 
 /* Contra reloj */
 .timer{flex:1;max-width:70vmin;height:3vmin;background:var(--soft);border-radius:2vmin;overflow:hidden;border:.5vmin solid var(--ink)}
 .timer i{display:block;height:100%;background:var(--ink);transform-origin:left;transition:none}
-.opts{display:grid;grid-template-columns:repeat(2,34vmin);gap:3vmin}
+.opts{display:grid;grid-template-columns:repeat(2,34vmin);gap:1.5vmin}
 .opts .f{height:17vmin;font-size:9vmin;font-weight:800}
 .combo{height:5vmin;font-size:4vmin;font-weight:800}
 
@@ -305,8 +309,8 @@ h2{font-size:6vmin;margin:0;line-height:1}
     }
     else if (k === 10009 || k === 27) { e.preventDefault(); back(); }
     else if ($('practice').classList.contains('active')) {
-      if (k >= 48 && k <= 57) { digit(String(k-48)); $('okKey').focus(); }
-      else if (k >= 96 && k <= 105) { digit(String(k-96)); $('okKey').focus(); }
+      if (k >= 48 && k <= 57) digit(String(k-48));
+      else if (k >= 96 && k <= 105) digit(String(k-96));
       else if (k === 8) { e.preventDefault(); del(); }
     }
     else if ($('rapid').classList.contains('active') && k >= 49 && k <= 52) {
@@ -317,12 +321,12 @@ h2{font-size:6vmin;margin:0;line-height:1}
   // ---------- Hoja del día ----------
   const P = {};
   const pad = $('pad');
-  ['1','2','3','4','5','6','7','8','9','⌫','0','✓'].forEach(t => {
+  // Sin botón de revisar: se revisa solo al escribir todos los dígitos, así el cursor viaja menos
+  ['1','2','3','4','5','6','7','8','9','0','⌫'].forEach(t => {
     const b = document.createElement('button');
     b.className = 'f'; b.textContent = t;
-    if (t === '✓') { b.classList.add('ok-key'); b.id = 'okKey'; b.setAttribute('aria-label','Revisar'); b.onclick = check; }
-    else if (t === '⌫') { b.setAttribute('aria-label','Borrar'); b.onclick = del; }
-    else b.onclick = () => digit(t);
+    if (t === '⌫') { b.setAttribute('aria-label','Borrar'); b.onclick = del; }
+    else { if (t === '0') b.classList.add('zero'); b.onclick = () => digit(t); }
     pad.appendChild(b);
   });
 
@@ -346,7 +350,11 @@ h2{font-size:6vmin;margin:0;line-height:1}
     [...$('dots').children].forEach((d,i) => d.classList.toggle('now', i === P.i));
   }
   const renderP = () => { $('pA').textContent = P.input; };
-  function digit(d){ if (P.lock || P.input.length >= 3) return; P.input = (P.input === '0' ? '' : P.input) + d; renderP(); }
+  function digit(d){
+    if (P.lock) return;
+    P.input = (P.input === '0' ? '' : P.input) + d; renderP();
+    if (P.input.length >= String(P.cur[3]).length) check();
+  }
   function del(){ if (P.lock) return; P.input = P.input.slice(0,-1); renderP(); }
   function check(){
     if (P.lock || P.input === '') return;
