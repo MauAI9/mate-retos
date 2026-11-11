@@ -7,4 +7,3 @@ Juego de mate para jugar en la tele con el control (flechas, OK y Back). Es un p
 - Se publica en GitHub Pages desde `main`. Cada merge a `main` actualiza https://mauai9.github.io/mate-retos/ en uno o dos minutos.
 - El repo es público. No se suben nombres, fotos ni datos de la familia.
 - El avance vive en el localStorage del navegador (`mate-retos`). Un cambio al estado tiene que seguir leyendo lo que ya está guardado.
-- `config.xml` e `icon.png` son para instalarlo como app de Tizen en la tele Samsung. En el navegador no se usan.
